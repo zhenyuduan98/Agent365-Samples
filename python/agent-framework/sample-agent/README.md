@@ -50,6 +50,131 @@ elif action == "remove":
 
 To test with Agents Playground, use **Mock an Activity → Install application** to send a simulated `installationUpdate` activity.
 
+## Entra ID App Registration (Step-by-Step)
+
+Before running this agent, you need to register an application in Microsoft Entra ID (Azure AD). This app provides the `CLIENT_ID` and `CLIENT_SECRET` used for authentication against the Microsoft 365 Agents platform and Microsoft Graph.
+
+### Step 1: Create the App Registration
+
+1. Go to [Azure Portal](https://portal.azure.com) → **Microsoft Entra ID** → **App registrations** → **+ New registration**
+2. Fill in the details:
+   - **Name**: e.g., `Agent365-CLI-Client` (or any descriptive name)
+   - **Supported account types**: Select **Accounts in this organizational directory only** (Single tenant)
+   - **Redirect URI**: Select **Public client/native (mobile & desktop)** and enter `http://localhost`
+3. Click **Register**
+4. On the **Overview** page, copy the following values — you will need them for `.env`:
+   - **Application (client) ID** → `CLIENT_ID`
+   - **Directory (tenant) ID** → `TENANT_ID`
+
+### Step 2: Create a Client Secret
+
+1. In your app registration, go to **Certificates & secrets** → **Client secrets** → **+ New client secret**
+2. Enter a description (e.g., `agent-dev-secret`) and choose an expiration period
+3. Click **Add**
+4. **Immediately copy the secret Value** (not the Secret ID) → `CLIENT_SECRET`
+   > ⚠️ The secret value is only shown once. If you lose it, you must create a new one.
+
+### Step 3: Configure API Permissions (Delegated)
+
+This agent needs delegated permissions to access Microsoft Graph and MCP tool servers on behalf of the signed-in user.
+
+1. Go to **API permissions** → **+ Add a permission**
+
+#### 3a. Microsoft Graph Permissions
+
+Select **Microsoft Graph** → **Delegated permissions**, then add:
+
+| Permission | Purpose |
+|---|---|
+| `Mail.Read` | Read user's mailbox (for MCP MailTools) |
+| `Mail.Send` | Send mail on behalf of the user |
+| `User.Read` | Sign in and read user profile |
+
+#### 3b. MCP Server Permissions (Agent 365 Platform)
+
+If your agent uses MCP tool servers (e.g., `mcp_MailTools`), you also need to add permissions for the MCP server API:
+
+1. Click **+ Add a permission** → **APIs my organization uses**
+2. Search for the MCP server application by its audience (e.g., `05879165-0320-489e-b644-f72b33f3edf0` — this is the MCP MailTools resource app)
+3. Select **Delegated permissions** → add:
+
+| Permission | Purpose |
+|---|---|
+| `McpServers.Mail.All` | Access MCP Mail tool server |
+| `McpServersMetadata.Read.All` | Read MCP server metadata |
+
+> 💡 These scopes correspond to the `scope` and `audience` fields in `ToolingManifest.json`.
+
+#### 3c. Grant Admin Consent
+
+After adding all permissions, click **Grant admin consent for [your tenant]** (requires Global Admin or Privileged Role Admin).
+
+Verify that all permissions show a green checkmark ✅ under the **Status** column.
+
+### Step 4: Configure the Service Connection
+
+For the M365 Agents SDK to authenticate outgoing API calls, this sample uses a **Service Connection** pattern via environment variables. Add the following to your `.env` file:
+
+```env
+# App Registration
+CLIENT_ID=<your-application-client-id>
+CLIENT_SECRET=<your-client-secret-value>
+TENANT_ID=<your-directory-tenant-id>
+
+# Service Connection (used by M365 Agents SDK)
+CONNECTIONS__SERVICE_CONNECTION__SETTINGS__CLIENTID=<same-client-id>
+CONNECTIONS__SERVICE_CONNECTION__SETTINGS__CLIENTSECRET=<same-client-secret>
+CONNECTIONS__SERVICE_CONNECTION__SETTINGS__TENANTID=<same-tenant-id>
+CONNECTIONS__SERVICE_CONNECTION__SETTINGS__SCOPES=https://graph.microsoft.com/.default
+CONNECTIONSMAP_0_SERVICEURL=*
+CONNECTIONSMAP_0_CONNECTION=SERVICE_CONNECTION
+```
+
+> The `CONNECTIONS__*` variables map to the M365 Agents SDK connection configuration. Setting `CONNECTIONSMAP_0_SERVICEURL=*` means this connection is used for all outbound service URLs.
+
+### Step 5: (Optional) MCP Bearer Token
+
+If using MCP tool servers, the agent needs a user-delegated token with MCP scopes. This token is passed to the MCP server for on-behalf-of access:
+
+```env
+MCP_BEARER_TOKEN=<user-delegated-jwt-with-mcp-scopes>
+```
+
+To obtain this token:
+1. Use the [MSAL](https://learn.microsoft.com/en-us/entra/identity-platform/msal-overview) library or [Microsoft Authentication Manager (WAM)](https://learn.microsoft.com/en-us/entra/identity-platform/scenario-desktop-acquire-token-wam) on a Windows machine to sign in interactively
+2. Request scopes: `api://05879165-0320-489e-b644-f72b33f3edf0/McpServers.Mail.All`
+3. Copy the resulting access token into `MCP_BEARER_TOKEN`
+
+> ⚠️ This token expires after ~1 hour. For development/demo purposes, you need to refresh it manually.
+
+### Summary of `.env` Variables
+
+| Variable | Description |
+|---|---|
+| `CLIENT_ID` | Entra App Registration client ID |
+| `CLIENT_SECRET` | Entra App Registration client secret |
+| `TENANT_ID` | Entra Directory (tenant) ID |
+| `AZURE_OPENAI_API_KEY` | Azure OpenAI API key |
+| `AZURE_OPENAI_ENDPOINT` | Azure OpenAI endpoint URL |
+| `AZURE_OPENAI_DEPLOYMENT` | Azure OpenAI model deployment name |
+| `AZURE_OPENAI_API_VERSION` | Azure OpenAI API version |
+| `PORT` | Agent server listening port (default: `3978`) |
+| `MCP_BEARER_TOKEN` | User-delegated JWT for MCP server access |
+| `USE_AGENTIC_AUTH` | Enable agentic (Agent Instance) auth (`true`/`false`) |
+| `LOG_LEVEL` | Logging level (`INFO`, `DEBUG`, etc.) |
+
+### Troubleshooting
+
+| Issue | Solution |
+|---|---|
+| `AADSTS65001: The user or administrator has not consented` | Go to API permissions and click **Grant admin consent** |
+| `AADSTS7000215: Invalid client secret` | Regenerate the secret; make sure you copied the **Value**, not the **Secret ID** |
+| `Directory.AccessAsUser.All` causing blueprint creation failure | This permission may be injected by WAM; clear token cache and re-authenticate |
+| MCP token expired | Refresh the `MCP_BEARER_TOKEN` by re-authenticating with MSAL/WAM |
+| `401 Unauthorized` in Teams | Agent needs an Agent Instance with proper credentials (anonymous mode won't work) |
+
+---
+
 ## Running the Agent
 
 To set up and test this agent, refer to the [Configure Agent Testing](https://learn.microsoft.com/en-us/microsoft-agent-365/developer/testing?tabs=python) guide for complete instructions.
