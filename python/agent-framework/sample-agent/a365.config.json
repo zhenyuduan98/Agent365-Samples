@@ -1,0 +1,18 @@
+{
+  "tenantId": "5e1b1886-2cb4-41c5-bd28-ae40921dba35",
+  "subscriptionId": "d64656bd-65cf-450b-aab0-a70653e9397d",
+  "resourceGroup": "agent365-demo-rg",
+  "location": "eastus",
+  "environment": "prod",
+  "messagingEndpoint": "http://localhost:3978/api/messages",
+  "needDeployment": false,
+  "clientAppId": "47394299-a43b-4e0f-8fab-3bf52d81c285",
+  "agentIdentityDisplayName": "Agent365MailDemo Identity",
+  "agentBlueprintDisplayName": "Agent365MailDemo Blueprint",
+  "agentUserPrincipalName": "agent365maildemo@MngEnvMCAP033928.onmicrosoft.com",
+  "agentUserDisplayName": "Agent365MailDemo Agent User",
+  "managerEmail": "zhenyuduan@MngEnvMCAP033928.onmicrosoft.com",
+  "agentUserUsageLocation": "US",
+  "deploymentProjectPath": "/home/azureuser/Agent365-Samples/python/agent-framework/sample-agent",
+  "agentDescription": "Agent365MailDemo - Agent 365 Agent"
+}

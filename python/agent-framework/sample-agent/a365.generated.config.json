@@ -1,0 +1,16 @@
+{
+  "managedIdentityPrincipalId": null,
+  "agentBlueprintId": "b967fe5f-ad7f-40d7-9a7e-510a3019b1e5",
+  "agentBlueprintObjectId": "b967fe5f-ad7f-40d7-9a7e-510a3019b1e5",
+  "agentBlueprintServicePrincipalObjectId": null,
+  "AgenticAppId": null,
+  "AgenticUserId": null,
+  "agentBlueprintClientSecretProtected": false,
+  "botId": null,
+  "botMsaAppId": null,
+  "botMessagingEndpoint": null,
+  "lastUpdated": "2026-03-17T01:25:46.3592058Z",
+  "cliVersion": "1.1.115.64799",
+  "completed": false,
+  "completedAt": null
+}

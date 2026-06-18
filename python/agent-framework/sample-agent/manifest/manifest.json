@@ -1,0 +1,50 @@
+{
+    "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.22/MicrosoftTeams.schema.json",
+    "manifestVersion": "1.22",
+    "version": "1.0.0",
+    "id": "b967fe5f-ad7f-40d7-9a7e-510a3019b1e5",
+    "developer": {
+        "name": "Microsoft China - Zhenyu Duan",
+        "websiteUrl": "https://www.microsoft.com",
+        "privacyUrl": "https://privacy.microsoft.com",
+        "termsOfUseUrl": "https://www.microsoft.com/servicesagreement"
+    },
+    "icons": {
+        "color": "color.png",
+        "outline": "outline.png"
+    },
+    "name": {
+        "short": "Agent365MailDemo",
+        "full": "Agent 365 Mail Demo - Outlook Email Assistant"
+    },
+    "description": {
+        "short": "An AI agent that can read and manage your Outlook emails using MCP MailTools",
+        "full": "Agent365MailDemo is an AI-powered email assistant built with Microsoft Agent 365 SDK and Agent Framework. It uses MCP MailTools to read, search, and manage Outlook emails. Powered by Azure OpenAI GPT-5.2-chat."
+    },
+    "accentColor": "#0078D4",
+    "copilotAgents": {
+        "customEngineAgents": [
+            {
+                "id": "b967fe5f-ad7f-40d7-9a7e-510a3019b1e5",
+                "type": "bot"
+            }
+        ]
+    },
+    "bots": [
+        {
+            "botId": "b967fe5f-ad7f-40d7-9a7e-510a3019b1e5",
+            "scopes": [
+                "personal"
+            ],
+            "supportsFiles": false,
+            "isNotificationOnly": false
+        }
+    ],
+    "permissions": [
+        "identity",
+        "messageTeamMembers"
+    ],
+    "validDomains": [
+        "128.85.34.109"
+    ]
+}
